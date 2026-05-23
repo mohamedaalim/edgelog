@@ -205,7 +205,7 @@ export default function DashboardPage() {
                     <tr key={row.symbol} className="border-b border-[var(--card-border)] hover:bg-[var(--card-border)] transition-colors">
                       <td className="px-5 py-2.5 font-medium text-white">{row.symbol}</td>
                       <td className="px-5 py-2.5 text-[var(--muted)]">{row.count}</td>
-                      <td className="px-5 py-2.5 text-[var(--muted)]">{row.winRate.toFixed(1)}%</td>
+                      <td className="px-5 py-2.5 text-[var(--muted)]">{(row.winRate ?? 0).toFixed(1)}%</td>
                       <td className={cn("px-5 py-2.5 font-medium", row.pnl >= 0 ? "text-[var(--green)]" : "text-[var(--red)]")}>
                         {formatCurrency(row.pnl)}
                       </td>
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-[var(--muted)] text-xs">{t.setupType ?? "—"}</td>
-                    <td className="px-4 py-2.5 text-[var(--muted)]">${t.entryPrice.toFixed(2)}</td>
+                    <td className="px-4 py-2.5 text-[var(--muted)]">{t.entryPrice != null ? `$${t.entryPrice.toFixed(2)}` : "—"}</td>
                     <td className="px-4 py-2.5 text-[var(--muted)]">{t.exitPrice ? `$${t.exitPrice.toFixed(2)}` : "—"}</td>
                     <td className="px-4 py-2.5 text-[var(--muted)]">{t.quantity}</td>
                     <td className={cn("px-4 py-2.5 font-medium", t.netPnl >= 0 ? "text-[var(--green)]" : "text-[var(--red)]")}>
