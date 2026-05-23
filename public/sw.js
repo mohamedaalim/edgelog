@@ -1,5 +1,5 @@
-const CACHE = "edgelog-v2";
-const PRECACHE = ["/", "/dashboard", "/journal", "/analytics", "/manifest.json"];
+const CACHE = "edgelog-v3";
+const PRECACHE = ["/", "/manifest.json"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)));
