@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/apiAuth";
+import { Prisma } from "@prisma/client";
 
 export async function GET() {
   const { userId, error } = await requireSession();
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
   const { name, broker, accountNumber, accountType, initialBalance, currency, commission, commissionType, isDefault } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "name is required" }, { status: 400 });
 
-  const account = await prisma.$transaction(async (tx) => {
+  const account = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const existingCount = await tx.account.count({ where: { userId: userId! } });
     const shouldBeDefault = isDefault || existingCount === 0;
 
