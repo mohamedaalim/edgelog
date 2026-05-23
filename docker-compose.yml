@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: edgelog-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: edgelog
+      POSTGRES_PASSWORD: edgelog
+      POSTGRES_DB: edgelog
+    ports:
+      - "5433:5432"
+    volumes:
+      - edgelog_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edgelog"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: edgelog-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - edgelog_redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Lightweight cron container — runs the daily digest Mon-Fri at 5 PM ET (22:00 UTC)
+  cron:
+    image: alpine:3.19
+    container_name: edgelog-cron
+    restart: unless-stopped
+    environment:
+      APP_URL: "${APP_URL:-http://host.docker.internal:3000}"
+      CRON_SECRET: "${CRON_SECRET:-}"
+    volumes:
+      - ./scripts/cron-daily-digest.sh:/cron-daily-digest.sh:ro
+    entrypoint: >
+      sh -c "
+        apk add --no-cache curl &&
+        echo '0 22 * * 1-5 APP_URL=$$APP_URL CRON_SECRET=$$CRON_SECRET /cron-daily-digest.sh >> /var/log/edgelog-digest.log 2>&1' | crontab - &&
+        crond -f -l 6
+      "
+
+volumes:
+  edgelog_postgres_data:
+  edgelog_redis_data:

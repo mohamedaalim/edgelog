@@ -1,0 +1,585 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  image           String?
+  password        String?
+  timezone        String    @default("America/New_York")
+  currency        String    @default("USD")
+  accountSize     Float     @default(0)
+  riskPerTrade    Float     @default(1)
+
+  aiModel          String   @default("claude-sonnet-4-6")
+
+  emailAlerts      Boolean  @default(false)
+  alertEmail       String?
+  alertDrawdownPct Float?
+  alertDailyRecap  Boolean  @default(false)
+
+  // 2FA
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean  @default(false)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  accounts          Account[]
+  trades            Trade[]
+  journalEntries    JournalEntry[]
+  playbooks         Playbook[]
+  rules             Rule[]
+  tags              Tag[]
+  tradingPlans      TradingPlan[]
+  snapshots         PerformanceSnapshot[]
+  sessions          Session[]
+  riskOverrides     RiskOverrideLog[]
+  tradeComments     TradeComment[]
+  notifications     Notification[]
+  subscription      Subscription?
+  brokerConnections    BrokerConnection[]
+  milestones           UserMilestone[]
+  passwordResetTokens  PasswordResetToken[]
+  propChallenges       PropChallenge[]
+  behavioralDigests    BehavioralDigest[]
+  pushSubscriptions    PushSubscription[]
+  deviceTokens         DeviceToken[]
+}
+
+model BrokerConnection {
+  id             String    @id @default(cuid())
+  userId         String
+  broker         String
+  displayName    String
+  apiKey         String?
+  apiSecret      String?
+  accountId      String?
+  environment    String    @default("live")
+  credentials    Json?
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+  isActive       Boolean   @default(true)
+  lastSyncAt     DateTime?
+  lastSyncStatus String?
+  lastSyncCount  Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id             String      @id @default(cuid())
+  userId         String
+  name           String
+  broker         String?
+  accountNumber  String?
+  accountType    AccountType @default(LIVE)
+  initialBalance Float       @default(0)
+  currentBalance Float       @default(0)
+  currency       String      @default("USD")
+  isDefault      Boolean     @default(false)
+  isActive       Boolean     @default(true)
+  commission     Float       @default(0)
+  commissionType String      @default("per_trade")
+  dailyLossLimit Float?
+  maxDailyTrades Int?
+  createdAt      DateTime    @default(now())
+
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades    Trade[]
+  snapshots PerformanceSnapshot[]
+
+  @@index([userId])
+}
+
+model Trade {
+  id        String      @id @default(cuid())
+  userId    String
+  accountId String
+
+  symbol     String
+  assetClass AssetClass  @default(STOCK)
+  side       TradeSide
+  status     TradeStatus @default(CLOSED)
+
+  quantity   Float
+  entryPrice Float
+  exitPrice  Float?
+  stopLoss   Float?
+  takeProfit Float?
+
+  entryTime    DateTime
+  exitTime     DateTime?
+  holdDuration Int?
+
+  grossPnl   Float @default(0)
+  netPnl     Float @default(0)
+  commission Float @default(0)
+  fees       Float @default(0)
+  slippage   Float @default(0)
+
+  riskAmount            Float?
+  rewardAmount          Float?
+  rRatio                Float?
+  maxAdverseExcursion   Float?
+  maxFavorableExcursion Float?
+
+  setupType       String?
+  timeframe       String?
+  marketCondition String?
+  trend           String?
+
+  emotionBefore Int?
+  emotionAfter  Int?
+  confidence    Int?
+
+  mistakeTags String[]
+  setupTags   String[]
+  customTags  String[]
+
+  notes          String?
+  lessonsLearned String?
+  screenshot     String?
+  annotations    Json?
+
+  optionExpiry      DateTime? @db.Date
+  strike            Float?
+  optionType        String?
+  ivAtEntry         Float?
+  ivRank            Float?
+  delta             Float?
+  gamma             Float?
+  theta             Float?
+  vega              Float?
+  underlyingPrice   Float?
+
+  playbookId    String?
+  rulesFollowed Boolean?
+  rulesBroken   String[]
+
+  // Multi-leg options
+  legGroupId   String?
+  legLabel     String?
+  contractMultiplier Float @default(1)
+
+  // Public sharing
+  isPublic     Boolean @default(false)
+  shareToken   String? @unique
+
+  // Currency — stored in account's base currency after conversion
+  currency         String  @default("USD")  // account base currency at time of import
+  originalCurrency String?                  // source currency if different from account base
+  originalNetPnl   Float?                   // P&L in original currency (pre-conversion)
+  originalGrossPnl Float?
+  exchangeRate     Float?                   // rate applied: 1 originalCurrency = exchangeRate * currency
+
+  isManual     Boolean @default(true)
+  importSource String?
+  importHash   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account        Account          @relation(fields: [accountId], references: [id])
+  playbook       Playbook?        @relation(fields: [playbookId], references: [id])
+  executions     TradeExecution[]
+  journalEntries JournalEntry[]   @relation("JournalTrades")
+  comments       TradeComment[]
+  screenshots    TradeScreenshot[]
+
+  @@index([userId, entryTime])
+  @@index([userId, accountId, entryTime])
+  @@index([userId, symbol])
+  @@index([userId, setupType])
+  @@index([userId, status])
+  @@index([userId, playbookId])
+  @@index([importHash])
+  @@index([legGroupId])
+  @@index([shareToken])
+}
+
+model TradeExecution {
+  id         String        @id @default(cuid())
+  tradeId    String
+  type       ExecutionType
+  side       TradeSide
+  quantity   Float
+  price      Float
+  timestamp  DateTime
+  commission Float         @default(0)
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([tradeId])
+}
+
+model TradeScreenshot {
+  id        String   @id @default(cuid())
+  tradeId   String
+  url       String
+  label     String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+}
+
+model TradeComment {
+  id        String   @id @default(cuid())
+  tradeId   String
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model JournalEntry {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @db.Date
+
+  marketBias      String?
+  prePlanning     String?
+  postReview      String?
+  whatWentWell    String?
+  whatWentWrong   String?
+  tomorrowPlan    String?
+  grade           String?
+  aiCoachFeedback String?
+
+  mood         Int?
+  energyLevel  Int?
+  focus        Int?
+  sleepQuality Int?
+  stress       Int?
+
+  maxLossLimit Float?
+  targetProfit Float?
+  maxTrades    Int?
+
+  rulesFollowed  String[]
+  rulesBroken    String[]
+  tags           String[]
+  attachments    String[]
+
+  dailyPnl       Float @default(0)
+  dailyWins      Int   @default(0)
+  dailyLosses    Int   @default(0)
+  adherenceScore Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades Trade[] @relation("JournalTrades")
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model Playbook {
+  id          String       @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  setupType   String?
+  assetClass  AssetClass[]
+  timeframes  String[]
+  entryRules  String?
+  exitRules   String?
+  riskRules   String?
+  isActive    Boolean      @default(true)
+  tags        String[]
+  screenshot  String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades Trade[]
+
+  @@index([userId])
+}
+
+model Rule {
+  id             String       @id @default(cuid())
+  userId         String
+  text           String
+  category       RuleCategory @default(MISC)
+  isActive       Boolean      @default(true)
+  violationCount Int          @default(0)
+  order          Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String?
+  category  String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
+
+model TradingPlan {
+  id           String     @id @default(cuid())
+  userId       String
+  date         DateTime   @db.Date
+  maxDailyLoss Float?
+  maxTrades    Int?
+  targetProfit Float?
+  watchlist    Json?
+  notes        String?
+  status       PlanStatus @default(DRAFT)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model PerformanceSnapshot {
+  id            String   @id @default(cuid())
+  userId        String
+  accountId     String
+  date          DateTime @db.Date
+  equity        Float
+  dailyPnl      Float
+  cumulativePnl Float
+  drawdown      Float
+  winRate       Float
+  profitFactor  Float
+  totalTrades   Int
+  winners       Int
+  losers        Int
+  createdAt     DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@unique([userId, accountId, date])
+  @@index([userId, accountId, date])
+}
+
+model RiskOverrideLog {
+  id        String   @id @default(cuid())
+  userId    String
+  checkType String
+  details   String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+}
+
+model UserMilestone {
+  id          String   @id @default(cuid())
+  userId      String
+  milestoneId String
+  unlockedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, milestoneId])
+  @@index([userId])
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  stripePriceId        String?
+  plan                 Plan      @default(FREE)
+  status               String    @default("active")
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  tradesThisMonth      Int       @default(0)
+  aiQueriesThisDay     Int       @default(0)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PropChallenge {
+  id          String   @id @default(cuid())
+  userId      String
+  accountId   String?
+
+  firm        String
+  phase       String   @default("challenge")
+  status      String   @default("active")
+
+  accountSize         Float
+  maxDailyLossPct     Float
+  maxTotalDrawdownPct Float
+  profitTargetPct     Float
+  minTradingDays      Int?
+  isTrailingDrawdown  Boolean  @default(false)
+
+  startDate   DateTime
+  endDate     DateTime?
+
+  currentEquity Float
+  highWaterMark Float
+  tradingDaysCount Int @default(0)
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String   // "ios" | "android"
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum AccountType {
+  LIVE
+  PAPER
+  BACKTEST
+}
+
+enum AssetClass {
+  STOCK
+  OPTION
+  FUTURE
+  FOREX
+  CRYPTO
+}
+
+enum TradeSide {
+  LONG
+  SHORT
+}
+
+enum TradeStatus {
+  OPEN
+  CLOSED
+  PARTIAL
+}
+
+enum ExecutionType {
+  ENTRY
+  EXIT
+  ADD
+  PARTIAL
+}
+
+enum RuleCategory {
+  ENTRY
+  EXIT
+  RISK
+  PSYCHOLOGY
+  MISC
+}
+
+enum PlanStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+}
+
+enum Plan {
+  FREE
+  PRO
+  ELITE
+}
+
+model BehavioralDigest {
+  id         String   @id @default(cuid())
+  userId     String
+  weekOf     DateTime
+  summary    String
+  findings   Json
+  tradeCount Int
+  netPnl     Float
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}

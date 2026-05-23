@@ -1,0 +1,23 @@
+{
+  "name": "EdgeLog — Trading Journal",
+  "short_name": "EdgeLog",
+  "description": "World-class trading journal and analytics platform",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#6c5ce7",
+  "background_color": "#0f1117",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    { "name": "Trade Log",     "url": "/journal",      "description": "View your trade log" },
+    { "name": "Daily Journal", "url": "/journal/daily","description": "Write your daily journal" },
+    { "name": "Analytics",     "url": "/analytics",    "description": "View performance analytics" },
+    { "name": "AI Coach",      "url": "/ai-coach",     "description": "Chat with your AI trading coach" }
+  ]
+}
