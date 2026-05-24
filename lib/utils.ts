@@ -5,22 +5,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(value: number, currency = "USD"): string {
+export function formatCurrency(value: number | null | undefined, currency = "USD"): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value);
+  }).format(value ?? 0);
 }
 
-export function formatPercent(value: number): string {
-  return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+export function formatPercent(value: number | null | undefined): string {
+  const n = value ?? 0;
+  return `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`;
 }
 
-export function formatR(value: number): string {
-  if (!isFinite(value) || isNaN(value)) return "N/A";
-  return `${value >= 0 ? "+" : ""}${value.toFixed(2)}R`;
+export function formatR(value: number | null | undefined): string {
+  const n = value ?? 0;
+  if (!isFinite(n) || isNaN(n)) return "N/A";
+  return `${n >= 0 ? "+" : ""}${n.toFixed(2)}R`;
 }
 
 export function formatDuration(seconds: number): string {

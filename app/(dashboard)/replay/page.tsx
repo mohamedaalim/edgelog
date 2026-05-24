@@ -173,7 +173,7 @@ function TradeCard({ trade, index, cumPnl }: { trade: ReplayTrade; index: number
               {trade.exitTime && <> → {format(parseISO(trade.exitTime), "HH:mm")}</>}
             </span>
             <span>{fmtDur(trade.holdDuration)}</span>
-            <span>{trade.quantity} @ {trade.entryPrice.toFixed(2)}</span>
+            <span>{trade.quantity}{trade.entryPrice != null ? ` @ ${trade.entryPrice.toFixed(2)}` : ""}</span>
             {trade.exitPrice && <span>→ {trade.exitPrice.toFixed(2)}</span>}
           </div>
         </div>
@@ -578,13 +578,13 @@ export default function ReplayPage() {
                 />
                 <StatCard
                   label="Win Rate"
-                  value={`${stats.winRate.toFixed(1)}%`}
+                  value={`${(stats.winRate ?? 0).toFixed(1)}%`}
                   sub={`${stats.winners}W / ${stats.losers}L`}
                   positive={stats.winRate >= 50}
                 />
                 <StatCard
                   label="Avg R"
-                  value={stats.avgR !== 0 ? `${stats.avgR >= 0 ? "+" : ""}${stats.avgR.toFixed(2)}R` : "—"}
+                  value={stats.avgR != null && stats.avgR !== 0 ? `${stats.avgR >= 0 ? "+" : ""}${stats.avgR.toFixed(2)}R` : "—"}
                   positive={stats.avgR > 0 ? true : stats.avgR < 0 ? false : undefined}
                 />
                 <StatCard
@@ -595,7 +595,7 @@ export default function ReplayPage() {
                 <StatCard label="Best Trade" value={fmt$(stats.bestTrade)} positive={stats.bestTrade > 0} />
                 <StatCard label="Worst Trade" value={fmt$(stats.worstTrade)} positive={stats.worstTrade >= 0} />
                 <StatCard label="Avg Win" value={stats.avgWin !== 0 ? fmt$(stats.avgWin) : "—"} positive={stats.avgWin > 0} />
-                <StatCard label="Commissions" value={`-$${stats.totalCommissions.toFixed(2)}`} />
+                <StatCard label="Commissions" value={`-$${(stats.totalCommissions ?? 0).toFixed(2)}`} />
               </div>
 
               {/* Intraday equity curve */}

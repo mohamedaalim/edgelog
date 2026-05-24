@@ -172,7 +172,7 @@ export default function JournalPage() {
       format(new Date(t.entryTime), "yyyy-MM-dd HH:mm"),
       t.symbol, t.side, t.setupType ?? "",
       t.entryPrice, t.exitPrice ?? "",
-      t.quantity, t.grossPnl.toFixed(2), t.netPnl.toFixed(2), t.commission.toFixed(2),
+      t.quantity, (t.grossPnl ?? 0).toFixed(2), (t.netPnl ?? 0).toFixed(2), (t.commission ?? 0).toFixed(2),
       t.rRatio?.toFixed(2) ?? "",
       t.holdDuration ? formatDuration(t.holdDuration) : "",
       [...t.setupTags, ...t.customTags].join(";"),
@@ -330,7 +330,7 @@ export default function JournalPage() {
                           </span>
                         </td>
                         <td className="px-3 py-2.5 text-[var(--muted)] text-xs">{t.setupType ?? "—"}</td>
-                        <td className="px-3 py-2.5 text-[var(--muted)]">${t.entryPrice.toFixed(2)}</td>
+                        <td className="px-3 py-2.5 text-[var(--muted)]">{t.entryPrice != null ? `$${t.entryPrice.toFixed(2)}` : "—"}</td>
                         <td className="px-3 py-2.5 text-[var(--muted)]">{t.exitPrice ? `$${t.exitPrice.toFixed(2)}` : "—"}</td>
                         <td className="px-3 py-2.5 text-[var(--muted)]">{t.quantity}</td>
                         <td className={cn("px-3 py-2.5", t.grossPnl >= 0 ? "text-[var(--green)]" : "text-[var(--red)]")}>{formatCurrency(t.grossPnl)}</td>
@@ -356,7 +356,7 @@ export default function JournalPage() {
               <tfoot className="sticky bottom-0 bg-[var(--card)] border-t-2 border-[var(--card-border)]">
                 <tr>
                   <td colSpan={9} className="px-3 py-2.5 text-xs text-[var(--muted)] font-medium">
-                    {trades.length} trades · Win Rate {totals.winRate.toFixed(1)}%
+                    {trades.length} trades · Win Rate {(totals.winRate ?? 0).toFixed(1)}%
                   </td>
                   <td className={cn("px-3 py-2.5 text-sm font-semibold", totals.grossPnl >= 0 ? "text-[var(--green)]" : "text-[var(--red)]")}>{formatCurrency(totals.grossPnl)}</td>
                   <td className={cn("px-3 py-2.5 text-sm font-bold", totals.netPnl >= 0 ? "text-[var(--green)]" : "text-[var(--red)]")}>{formatCurrency(totals.netPnl)}</td>

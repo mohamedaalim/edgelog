@@ -36,9 +36,9 @@ interface HeatmapData { timeHeatmap: HeatmapCell[]; symbolHeatmap: SymbolHeatCel
 interface OptionsData { empty: boolean; totalTrades: number; totalPnl: number; callTrades: number; putTrades: number; callPnl: number; putPnl: number; callWinRate: number; putWinRate: number; greeks: { avgIV: number; avgIVRank: number; avgDelta: number; avgGamma: number; avgTheta: number; avgVega: number; hasData: boolean; }; byExpiry: { expiry: string; pnl: number; trades: number; winRate: number }[]; byDTE: { bucket: string; pnl: number; trades: number; winRate: number }[]; byIVRank: { bucket: string; pnl: number; trades: number; winRate: number }[]; bySymbol: { symbol: string; pnl: number; trades: number; winRate: number; avgStrike: number | null }[]; }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-const fmt = (v: number, prefix = "$") => `${prefix}${v >= 0 ? "" : "-"}${Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const fmtPct = (v: number) => `${v.toFixed(1)}%`;
-const pnlColor = (v: number) => (v >= 0 ? "var(--green)" : "var(--red)");
+const fmt = (v: number | null | undefined, prefix = "$") => { const n = v ?? 0; return `${prefix}${n >= 0 ? "" : "-"}${Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; };
+const fmtPct = (v: number | null | undefined) => `${(v ?? 0).toFixed(1)}%`;
+const pnlColor = (v: number | null | undefined) => ((v ?? 0) >= 0 ? "var(--green)" : "var(--red)");
 
 const RANGE_OPTIONS: { label: string; value: Range }[] = [
   { label: "1W", value: "week" }, { label: "1M", value: "month" }, { label: "3M", value: "quarter" },
@@ -71,11 +71,11 @@ function PerformanceTab({ summary, range }: { summary: SummaryData; range: Range
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         <StatCard label="Net P&L" value={fmt(summary.netPnl)} color={pnlColor(summary.netPnl)} />
         <StatCard label="Win Rate" value={fmtPct(summary.winRate)} sub={`${summary.winners}W / ${summary.losers}L`} />
-        <StatCard label="Profit Factor" value={summary.profitFactor.toFixed(2)} sub={summary.profitFactor >= 1.5 ? "Strong edge" : summary.profitFactor >= 1 ? "Marginal" : "No edge"} color={summary.profitFactor >= 1.5 ? "var(--green)" : summary.profitFactor >= 1 ? "white" : "var(--red)"} />
+        <StatCard label="Profit Factor" value={(summary.profitFactor ?? 0).toFixed(2)} sub={(summary.profitFactor ?? 0) >= 1.5 ? "Strong edge" : (summary.profitFactor ?? 0) >= 1 ? "Marginal" : "No edge"} color={(summary.profitFactor ?? 0) >= 1.5 ? "var(--green)" : (summary.profitFactor ?? 0) >= 1 ? "white" : "var(--red)"} />
         <StatCard label="Expected Value" value={fmt(summary.ev)} color={pnlColor(summary.ev)} sub="per trade" />
-        <StatCard label="Sharpe ($)" value={summary.sharpe.toFixed(2)} sub="absolute P&L" color={summary.sharpe >= 1 ? "var(--green)" : "var(--red)"} />
+        <StatCard label="Sharpe ($)" value={(summary.sharpe ?? 0).toFixed(2)} sub="absolute P&L" color={(summary.sharpe ?? 0) >= 1 ? "var(--green)" : "var(--red)"} />
         <StatCard label="Sharpe (%)" value={(summary.sharpePct ?? 0).toFixed(2)} sub="% returns" color={(summary.sharpePct ?? 0) >= 1 ? "var(--green)" : "var(--red)"} />
-        <StatCard label="Total R" value={`${summary.totalR >= 0 ? "+" : ""}${summary.totalR.toFixed(1)}R`} color={pnlColor(summary.totalR)} />
+        <StatCard label="Total R" value={`${(summary.totalR ?? 0) >= 0 ? "+" : ""}${(summary.totalR ?? 0).toFixed(1)}R`} color={pnlColor(summary.totalR ?? 0)} />
         <StatCard label="Avg Win" value={fmt(summary.avgWin)} color="var(--green)" />
         <StatCard label="Avg Loss" value={fmt(Math.abs(summary.avgLoss))} color="var(--red)" />
         <StatCard label="Largest Win" value={fmt(summary.largestWin)} color="var(--green)" />
@@ -252,7 +252,7 @@ function PatternsTab({ time, symbols, setups, heatmap }: { time: TimeData; symbo
                   <td className="py-2 pr-5 text-[var(--muted)]">{s.count}</td>
                   <td className="py-2 pr-5 font-mono" style={{ color: pnlColor(s.pnl) }}>{fmt(s.pnl)}</td>
                   <td className="py-2 pr-5 text-white">{fmtPct(s.winRate)}</td>
-                  <td className="py-2 pr-5 font-mono" style={{ color: pnlColor(s.avgR) }}>{s.avgR.toFixed(2)}R</td>
+                  <td className="py-2 pr-5 font-mono" style={{ color: pnlColor(s.avgR) }}>{(s.avgR ?? 0).toFixed(2)}R</td>
                   <td className="py-2 pr-5 font-mono" style={{ color: pnlColor(s.avgPnl) }}>{fmt(s.avgPnl)}</td>
                   <td className="py-2 pr-5 text-[var(--muted)]">{s.longs}L / {s.shorts}S</td>
                   <td className="py-2 pr-5 font-mono text-[var(--green)]">{fmt(s.bestTrade)}</td>
@@ -281,8 +281,8 @@ function PatternsTab({ time, symbols, setups, heatmap }: { time: TimeData; symbo
                   <td className="py-2 pr-5 text-[var(--muted)]">{s.count}</td>
                   <td className="py-2 pr-5 font-mono" style={{ color: pnlColor(s.pnl) }}>{fmt(s.pnl)}</td>
                   <td className="py-2 pr-5 text-white">{fmtPct(s.winRate)}</td>
-                  <td className="py-2 pr-5 font-mono" style={{ color: pnlColor(s.avgR) }}>{s.avgR.toFixed(2)}R</td>
-                  <td className="py-2 pr-5" style={{ color: s.profitFactor >= 1.5 ? "var(--green)" : s.profitFactor >= 1 ? "white" : "var(--red)" }}>{s.profitFactor.toFixed(2)}</td>
+                  <td className="py-2 pr-5 font-mono" style={{ color: pnlColor(s.avgR) }}>{(s.avgR ?? 0).toFixed(2)}R</td>
+                  <td className="py-2 pr-5" style={{ color: (s.profitFactor ?? 0) >= 1.5 ? "var(--green)" : (s.profitFactor ?? 0) >= 1 ? "white" : "var(--red)" }}>{(s.profitFactor ?? 0).toFixed(2)}</td>
                   <td className="py-2 pr-5 font-mono" style={{ color: pnlColor(s.ev) }}>{fmt(s.ev)}</td>
                   <td className="py-2 pr-5">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.hasEdge ? "bg-[var(--green-dim)] text-[var(--green)]" : "bg-[var(--red-dim)] text-[var(--red)]"}`}>
@@ -413,13 +413,13 @@ function RiskTab({ risk, monteCarlo }: { risk: RiskData; monteCarlo: MonteCarloD
       {/* Risk KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Kelly Criterion" value={fmtPct(risk.kelly)} sub="optimal position size" color={risk.kelly > 0 ? "var(--green)" : "var(--red)"} />
-        <StatCard label="Payoff Ratio" value={risk.payoffRatio.toFixed(2)} sub="avg win / avg loss" />
+        <StatCard label="Payoff Ratio" value={(risk.payoffRatio ?? 0).toFixed(2)} sub="avg win / avg loss" />
         <StatCard label="Risk of Ruin" value={fmtPct(risk.riskOfRuin)} color={risk.riskOfRuin < 5 ? "var(--green)" : risk.riskOfRuin < 20 ? "white" : "var(--red)"} sub="est. probability" />
         <StatCard label="Daily Volatility" value={fmt(risk.dailyVolatility)} sub="std dev of daily P&L" />
         <StatCard label="Max Consec Losses" value={String(risk.maxConsecLoss)} color="var(--red)" />
         <StatCard label="Max Consec Wins" value={String(risk.maxConsecWin)} color="var(--green)" />
-        <StatCard label="Avg MAE (R)" value={`${risk.avgMae.toFixed(2)}R`} sub="max adverse excursion" />
-        <StatCard label="Avg MFE (R)" value={`${risk.avgMfe.toFixed(2)}R`} sub="max favorable excursion" />
+        <StatCard label="Avg MAE (R)" value={`${(risk.avgMae ?? 0).toFixed(2)}R`} sub="max adverse excursion" />
+        <StatCard label="Avg MFE (R)" value={`${(risk.avgMfe ?? 0).toFixed(2)}R`} sub="max favorable excursion" />
       </div>
 
       {/* R histogram */}

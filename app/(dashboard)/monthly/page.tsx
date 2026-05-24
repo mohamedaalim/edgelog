@@ -116,8 +116,8 @@ function MonthCard({ m, isSelected, isBest, isWorst, onClick }: {
       {m.hasTrades && (
         <div className="flex gap-2 text-xs text-[var(--muted)]">
           <span>{m.totalTrades}T</span>
-          <span>{m.winRate.toFixed(0)}%WR</span>
-          <span>{m.avgR.toFixed(1)}R</span>
+          <span>{(m.winRate ?? 0).toFixed(0)}%WR</span>
+          <span>{(m.avgR ?? 0).toFixed(1)}R</span>
         </div>
       )}
     </button>
@@ -355,9 +355,9 @@ export default function MonthlyPage() {
                   <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
                     {[
                       { label: "Net P&L", value: formatCurrency(detail.netPnl), positive: detail.netPnl >= 0 },
-                      { label: "Win Rate", value: `${detail.winRate.toFixed(1)}%`, positive: detail.winRate >= 50 },
-                      { label: "Profit Factor", value: detail.profitFactor.toFixed(2), positive: detail.profitFactor >= 1 },
-                      { label: "Avg R", value: `${detail.avgR.toFixed(2)}R`, positive: detail.avgR >= 0 },
+                      { label: "Win Rate", value: `${(detail.winRate ?? 0).toFixed(1)}%`, positive: (detail.winRate ?? 0) >= 50 },
+                      { label: "Profit Factor", value: (detail.profitFactor ?? 0).toFixed(2), positive: (detail.profitFactor ?? 0) >= 1 },
+                      { label: "Avg R", value: `${(detail.avgR ?? 0).toFixed(2)}R`, positive: (detail.avgR ?? 0) >= 0 },
                       { label: "Best Day", value: formatCurrency(detail.bestDay), positive: true },
                       { label: "Worst Day", value: formatCurrency(detail.worstDay), positive: false },
                       { label: "Max Streak W", value: String(detail.maxWinStreak) },
@@ -405,7 +405,7 @@ export default function MonthlyPage() {
                             <tr key={s.symbol} className="border-b border-[var(--card-border)] last:border-0">
                               <td className="px-4 py-2 font-medium text-white">{s.symbol}</td>
                               <td className="px-4 py-2 text-[var(--muted)]">{s.count}</td>
-                              <td className="px-4 py-2 text-[var(--muted)]">{s.winRate.toFixed(0)}%</td>
+                              <td className="px-4 py-2 text-[var(--muted)]">{(s.winRate ?? 0).toFixed(0)}%</td>
                               <td className={cn("px-4 py-2 font-medium", s.pnl >= 0 ? "text-[var(--green)]" : "text-[var(--red)]")}>{formatCurrency(s.pnl)}</td>
                             </tr>
                           ))}
