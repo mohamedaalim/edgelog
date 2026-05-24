@@ -12,7 +12,7 @@ import {
   ChevronsUpDown, ArrowLeft, ArrowRight, Tag, X,
 } from "lucide-react";
 
-const ASSET_CLASSES = ["STOCK", "OPTION", "FUTURE", "FOREX", "CRYPTO"];
+const ASSET_CLASSES = ["STOCK", "OPTION", "FUTURE", "FOREX", "CRYPTO", "COMMODITY"];
 const PNL_FILTERS = [
   { label: "All", value: "all" },
   { label: "Winners", value: "winners" },

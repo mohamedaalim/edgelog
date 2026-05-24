@@ -9,7 +9,7 @@ const TradeSchema = z.object({
   accountId:    z.string().min(1),
   symbol:       z.string().min(1).max(20),
   side:         z.enum(["LONG", "SHORT"]),
-  assetClass:   z.enum(["STOCK", "OPTION", "FUTURE", "FOREX", "CRYPTO"]).optional(),
+  assetClass:   z.enum(["STOCK", "OPTION", "FUTURE", "FOREX", "CRYPTO", "COMMODITY"]).optional(),
   quantity:     z.number().positive(),
   entryPrice:   z.number().positive(),
   exitPrice:    z.number().positive().optional().nullable(),

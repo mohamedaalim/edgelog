@@ -7,7 +7,7 @@ import {
 } from "recharts";
 
 // ── Types ────────────────────────────────────────────────────────────────────
-type AssetClass = "STOCK" | "OPTION" | "FUTURE" | "FOREX" | "CRYPTO";
+type AssetClass = "STOCK" | "OPTION" | "FUTURE" | "FOREX" | "CRYPTO" | "COMMODITY";
 type RuleCategory = "ENTRY" | "EXIT" | "RISK" | "PSYCHOLOGY" | "MISC";
 
 interface PlaybookStats { tradeCount: number; winners: number; winRate: number; netPnl: number; avgR: number; adherence: number | null; }
@@ -37,9 +37,9 @@ const CAT_COLORS: Record<RuleCategory, string> = {
   PSYCHOLOGY: "text-yellow-400 bg-yellow-500/10",
   MISC: "text-[var(--muted)] bg-white/5",
 };
-const ASSET_LABELS: Record<AssetClass, string> = { STOCK: "Stocks", OPTION: "Options", FUTURE: "Futures", FOREX: "Forex", CRYPTO: "Crypto" };
+const ASSET_LABELS: Record<AssetClass, string> = { STOCK: "Stocks", OPTION: "Options", FUTURE: "Futures", FOREX: "Forex", CRYPTO: "Crypto", COMMODITY: "Commodity" };
 const TIMEFRAMES = ["1m", "2m", "5m", "15m", "30m", "1h", "4h", "1D", "1W"];
-const ALL_ASSETS: AssetClass[] = ["STOCK", "OPTION", "FUTURE", "FOREX", "CRYPTO"];
+const ALL_ASSETS: AssetClass[] = ["STOCK", "OPTION", "FUTURE", "FOREX", "CRYPTO", "COMMODITY"];
 
 // ── Playbook Form Modal ───────────────────────────────────────────────────────
 function PlaybookModal({ initial, onClose, onSaved }: {
