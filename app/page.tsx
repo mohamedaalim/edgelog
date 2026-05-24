@@ -148,8 +148,30 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="px-6 pb-6">
-            <div className="bg-[#0f1117] border border-[#1e2535] rounded-lg p-4 h-28 flex items-center justify-center">
-              <div className="text-xs text-[#4b5563]">Equity curve · 30-day view · +$4,230 cumulative</div>
+            <div className="bg-[#0f1117] border border-[#1e2535] rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-[#6b7280]">Equity Curve</span>
+                <span className="text-xs font-semibold text-[#22c55e]">+$4,230</span>
+              </div>
+              <svg viewBox="0 0 600 80" className="w-full h-16" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#22c55e" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M0,68 L20,65 L40,60 L60,62 L80,55 L100,50 L120,53 L140,45 L160,40 L180,44 L200,35 L220,30 L240,33 L260,25 L280,28 L300,20 L320,22 L340,15 L360,18 L380,10 L400,14 L420,8 L440,12 L460,6 L480,9 L500,4 L520,7 L540,3 L560,5 L580,2 L600,1"
+                  fill="url(#eqFill)"
+                  stroke="none"
+                />
+                <path
+                  d="M0,68 L20,65 L40,60 L60,62 L80,55 L100,50 L120,53 L140,45 L160,40 L180,44 L200,35 L220,30 L240,33 L260,25 L280,28 L300,20 L320,22 L340,15 L360,18 L380,10 L400,14 L420,8 L440,12 L460,6 L480,9 L500,4 L520,7 L540,3 L560,5 L580,2 L600,1"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="1.5"
+                />
+              </svg>
             </div>
           </div>
         </div>
