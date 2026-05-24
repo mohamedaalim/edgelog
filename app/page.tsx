@@ -53,9 +53,9 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp size={18} className="text-indigo-400" />
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <span className="font-bold text-white text-sm tracking-wide leading-none">Edge Log</span>
-              <span className="text-[9px] text-indigo-400/70 tracking-widest uppercase leading-none">The Eight Wonder</span>
+              <span className="text-[9px] text-indigo-400/70 tracking-widest uppercase leading-none">The Eighth Wonder</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -80,7 +80,7 @@ export default function LandingPage() {
           <br />
           <span className="text-indigo-400">actually improves your edge</span>
         </h1>
-        <p className="text-xs tracking-[0.3em] uppercase text-indigo-400/60 mb-5 font-medium">The Eight Wonder</p>
+        <p className="text-xs tracking-[0.3em] uppercase text-indigo-400/60 mb-5 font-medium">The Eighth Wonder</p>
         <p className="text-lg text-[#9ca3af] max-w-2xl mx-auto mb-8 leading-relaxed">
           Log trades, replay your day, track rule adherence, and get AI-powered coaching — all in one platform built for serious retail traders.
         </p>
@@ -221,7 +221,7 @@ export default function LandingPage() {
             <div>
               <span className="font-semibold text-[#6b7280]">Edge Log</span>
               <span className="mx-2 text-[#2d3748]">·</span>
-              <span className="text-indigo-400/50 tracking-widest uppercase text-[10px]">The Eight Wonder</span>
+              <span className="text-indigo-400/50 tracking-widest uppercase text-[10px]">The Eighth Wonder</span>
             </div>
             <span>© 2025</span>
           </div>

@@ -139,9 +139,6 @@ export default function LoginPage() {
               </Link>
             </p>
 
-            <p className="text-center text-xs text-[var(--muted)] mt-4 border border-[var(--card-border)] rounded-lg px-3 py-2">
-              Demo: demo@edgelog.io / password123
-            </p>
           </>
         )}
       </div>
